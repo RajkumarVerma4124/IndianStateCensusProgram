@@ -16,114 +16,81 @@ namespace IndianStateCensusTestProgram
         string wrongTypeFilePath = @"E:\CODING\Coding\React Web Apps\coreAPI\Fellowship\IndianStateCensusProgram\IndianStateCensusProgram\CSVFiles\IndianPopulation.txt";
         string wrongDelimiterFilePath = @"E:\CODING\Coding\React Web Apps\coreAPI\Fellowship\IndianStateCensusProgram\IndianStateCensusProgram\CSVFiles\DelimiterIndiaStateCensusData.csv";
         string wrongHeaderFilePath = @"E:\CODING\Coding\React Web Apps\coreAPI\Fellowship\IndianStateCensusProgram\IndianStateCensusProgram\CSVFiles\WrongIndiaStateCensusData.csv";
-
+        string stateCensusHeaders = "State,Population,AreaInSqKm,DensityPerSqKm";
         //List of file paths for indian state code(UC2)
         string stateCodeFilePath = @"E:\CODING\Coding\React Web Apps\coreAPI\Fellowship\IndianStateCensusProgram\IndianStateCensusProgram\CSVFiles\IndiaStateCode.csv";
         string wrongSCodeFilePath = @"E:\CODING\Coding\React Web Apps\coreAPI\Fellowship\IndianStateCensusProgram\IndianStateCensusProgram\CSVFiles\IndiaStateCodes.csv";
         string wrongSCodeTypeFilePath = @"E:\CODING\Coding\React Web Apps\coreAPI\Fellowship\IndianStateCensusProgram\IndianStateCensusProgram\CSVFiles\IndiaStateCode.txt";
         string wrongSCodeDelimiterFilePath = @"E:\CODING\Coding\React Web Apps\coreAPI\Fellowship\IndianStateCensusProgram\IndianStateCensusProgram\CSVFiles\DelimiterIndiaStateCode.csv";
         string wrongSCodeHeaderFilePath = @"E:\CODING\Coding\React Web Apps\coreAPI\Fellowship\IndianStateCensusProgram\IndianStateCensusProgram\CSVFiles\WrongIndiaStateCode.csv";
-
+        string stateCodeHeaders = "SrNo,State Name,TIN,StateCode";
         //Object for csv adapter class
         CSVAdapterFactory csvAdapter;
-        Dictionary<string, StateDTO> stateRecords;
+        Dictionary<string, StateDTO> stateCensusRecords;
+        Dictionary<string, StateDTO> stateCodeRecords;
 
         //Initializing the objects
         [TestInitialize]
         public void Setup()
         {
             csvAdapter = new CSVAdapterFactory();
-            stateRecords = new Dictionary<string, StateDTO>();
+            stateCensusRecords = new Dictionary<string, StateDTO>();
+            stateCodeRecords = new Dictionary<string, StateDTO>();
         }
 
-        //Test case for returning the total count from census if path is correct(UC1-TC1.1)
-        [TestCategory("Indian State Census")]
+        //Test case for returning the total count from census and state code if path is correct(UC1-TC1.1 && UC2-TC2.1)
+        [TestCategory("Indian State Census And Code")]
         [TestMethod]
-        public void GivenStateCsvReturnStateRecords()
+        public void GivenStateCodeOrCensusCsvReturnRecordsCount()
         {
-            stateRecords = csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, stateCensusFilePath, "State,Population,AreaInSqKm,DensityPerSqKm");
-            Assert.AreEqual(29, stateRecords.Count);
+            stateCensusRecords = csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, stateCensusFilePath, stateCensusHeaders);
+            stateCodeRecords = csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, stateCodeFilePath, stateCodeHeaders);
+            Assert.AreEqual(29, stateCensusRecords.Count);
+            Assert.AreEqual(37, stateCodeRecords.Count);
         }
 
-        //Test case for returning the file not found custom exception if path is incorrect(UC1-TC1.2)
-        [TestCategory("Indian State Census")]
+        //Test case for returning the file not found custom exception if path is incorrect(UC1-TC1.2 && UC2-TC2.2)
+        [TestCategory("Indian State Census And Code")]
         [TestMethod]
-        public void GivenWrongFileThrowCustomException()
+        public void GivenWrongFileThrowsCustomException()
         {
-            var customException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongFilePath, "State,Population,AreaInSqKm,DensityPerSqKm"));
-            Assert.AreEqual(CensusAnalyserException.ExceptionType.FILE_NOT_FOUND, customException.exception);
+            var customCensusException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongFilePath, stateCensusHeaders));
+            var stateCodeException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongSCodeFilePath, stateCodeHeaders));
+            Assert.AreEqual(CensusAnalyserException.ExceptionType.FILE_NOT_FOUND, customCensusException.exception);
+            Assert.AreEqual(CensusAnalyserException.ExceptionType.FILE_NOT_FOUND, stateCodeException.exception);
         }
 
-        //Test case for returning the invalid file type custom exception if file name is same and extension is different(UC1-TC1.3)
-        [TestCategory("Indian State Census")]
+        //Test case for returning the invalid file type custom exception if file name is same and extension is different(UC1-TC1.3 && UC2-TC2.3)
+        [TestCategory("Indian State Census And Code")]
         [TestMethod]
-        public void GivenWrongFileTypeThrowCustomException()
+        public void GivenWrongFileTypeThrowsCustomException()
         {
-            var customException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongTypeFilePath, "State,Population,AreaInSqKm,DensityPerSqKm"));
-            Assert.AreEqual(CensusAnalyserException.ExceptionType.INVALID_FILE_TYPE, customException.exception);
+            var customCensusException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongTypeFilePath, stateCensusHeaders));
+            var stateCodeException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongSCodeTypeFilePath, stateCodeHeaders));
+            Assert.AreEqual(CensusAnalyserException.ExceptionType.INVALID_FILE_TYPE, customCensusException.exception);
+            Assert.AreEqual(CensusAnalyserException.ExceptionType.INVALID_FILE_TYPE, stateCodeException.exception);
         }
 
-        //Test case for returning the incorrect delimeter in data custom exception if path is correct(UC1-TC1.4)
-        [TestCategory("Indian State Census")]
+        //Test case for returning the incorrect delimeter in data custom exception if path is correct(UC1-TC1.4 && UC2-TC2.4)
+        [TestCategory("Indian State Census And Code")]
         [TestMethod]
-        public void GivenWrongDelimiterThrowCustomException()
+        public void GivenWrongDelimiterThrowsCustomException()
         {
-            var customException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongDelimiterFilePath, "State,Population,AreaInSqKm,DensityPerSqKm"));
-            Assert.AreEqual(CensusAnalyserException.ExceptionType.INCORRECT_DELIMITER, customException.exception);
+            var customCensusException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongDelimiterFilePath, stateCensusHeaders));
+            var stateCodeException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongSCodeDelimiterFilePath, stateCodeHeaders));
+            Assert.AreEqual(CensusAnalyserException.ExceptionType.INCORRECT_DELIMITER, customCensusException.exception);
+            Assert.AreEqual(CensusAnalyserException.ExceptionType.INCORRECT_DELIMITER, stateCodeException.exception);
         }
 
-        //Test case for returning the incorrect header custom exception if path is correct(UC1-TC1.5)
-        [TestCategory("Indian State Census")]
+        //Test case for returning the incorrect header custom exception if path is correct(UC1-TC1.5  && UC2-TC2.5)
+        [TestCategory("Indian State Census And Code")]
         [TestMethod]
-        public void GivenWrongeHeaderThrowCustomException()
+        public void GivenWrongeHeaderThrowsCustomException()
         {
-            var customException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongHeaderFilePath, "State,Population,AreaInSqKm,DensityPerSqKm"));
-            Assert.AreEqual(CensusAnalyserException.ExceptionType.INCORRECT_HEADER, customException.exception);
-        }
-
-        //Test case for returning the total count from state code if path is correct(UC2-TC2.1)
-        [TestCategory("Indian State Code")]
-        [TestMethod]
-        public void GivenCsvFileReturnStateCodeRecords()
-        {
-            stateRecords = csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, stateCodeFilePath, "SrNo,State Name,TIN,StateCode");
-            Assert.AreEqual(37, stateRecords.Count);
-        }
-
-        //Test case for returning the file not found custom exception if path is incorrect(UC2-TC2.2)
-        [TestCategory("Indian State Code")]
-        [TestMethod]
-        public void GivenWrongFileOfSCThrowCustomException()
-        {
-            var customException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongSCodeFilePath, "SrNo,State Name,TIN,StateCode"));
-            Assert.AreEqual(CensusAnalyserException.ExceptionType.FILE_NOT_FOUND, customException.exception);
-        }
-
-        //Test case for returning the invalid file type custom exception if file name is same and extension is different(UC2-TC2.3)
-        [TestCategory("Indian State Code")]
-        [TestMethod]
-        public void GivenWrongFileOfSCTypeThrowCustomException()
-        {
-            var customException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongSCodeTypeFilePath, "SrNo,State Name,TIN,StateCode"));
-            Assert.AreEqual(CensusAnalyserException.ExceptionType.INVALID_FILE_TYPE, customException.exception);
-        }
-
-        //Test case for returning the incorrect delimeter in data custom exception if path is correct(UC2-TC2.4)
-        [TestCategory("Indian State Code")]
-        [TestMethod]
-        public void GivenWrongDelimiterOfSCThrowCustomException()
-        {
-            var customException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongSCodeDelimiterFilePath, "SrNo,State Name,TIN,StateCode"));
-            Assert.AreEqual(CensusAnalyserException.ExceptionType.INCORRECT_DELIMITER, customException.exception);
-        }
-
-        //Test case for returning the incorrect header custom exception if path is correct(UC2-TC2.5)
-        [TestCategory("Indian State Code")]
-        [TestMethod]
-        public void GivenWrongeHeaderOfSCThrowCustomException()
-        {
-            var customException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongSCodeHeaderFilePath, "SrNo,State Name,TIN,StateCode"));
-            Assert.AreEqual(CensusAnalyserException.ExceptionType.INCORRECT_HEADER, customException.exception);
+            var customCensusException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongHeaderFilePath, stateCensusHeaders));
+            var stateCodeException = Assert.ThrowsException<CensusAnalyserException>(() => csvAdapter.LoadCsvData(CensusAnalyser.Country.INDIA, wrongSCodeHeaderFilePath, stateCodeHeaders));
+            Assert.AreEqual(CensusAnalyserException.ExceptionType.INCORRECT_HEADER, customCensusException.exception);
+            Assert.AreEqual(CensusAnalyserException.ExceptionType.INCORRECT_HEADER, stateCodeException.exception);
         }
     }
 }
